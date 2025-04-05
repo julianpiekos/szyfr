@@ -26,7 +26,7 @@
 
     async function fetchAlphabet() {
     try {
-        let response = await fetch("https://julianpiekos.github.io/szyfr/alphabet.json");
+        let response = await fetch("alphabet.json");
         let data = await response.json();
         alphabet = data.alphabet;
         console.log("Pobrany alfabet:", alphabet);
