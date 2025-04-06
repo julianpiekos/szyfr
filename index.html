@@ -136,6 +136,28 @@
             }
             readImage(input);
         }
+
+        function encryptText() {
+    let input = document.getElementById("inputText").value;
+    let encrypted = [];
+
+    for (let char of input) {
+        if (char === ' ') {
+            encrypted.push(0);
+        } else {
+            let index = alphabet.indexOf(char);
+            if (index !== -1) {
+                encrypted.push(index + 1);
+            } else {
+                console.warn(`Nieznany znak: '${char}' (kod: ${char.charCodeAt(0)})`);
+            }
+        }
+    }
+
+    let binaryResult = encrypted.map(num => num.toString(2));
+    drawTape(binaryResult);
+}
+
     </script>
 </body>
 </html>
