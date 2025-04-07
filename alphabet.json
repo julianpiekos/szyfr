@@ -1,1 +1,3 @@
-{ "alphabet": "\n\taąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż1234567890<>.,-!#:\"/(){}[]=" }
+{
+  "alphabet": "aąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż1234567890<>.,-!#:\\\"/(){}[] \t\n"
+}
