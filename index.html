@@ -1,143 +1,139 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Szyfrowanie i deszyfrowanie tekstu</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
-        textarea, button, canvas { margin-top: 10px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Szyfrowanie i deszyfrowanie</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+    textarea, button, canvas { margin-top: 10px; }
+  </style>
 </head>
 <body>
-    <h2>Szyfrowanie i deszyfrowanie tekstu</h2>
-    <textarea id="inputText" rows="4" cols="50" placeholder="Wpisz tekst do zaszyfrowania"></textarea><br>
-    <button onclick="encryptText()">Szyfruj</button>
-    <button onclick="decryptFromImage()">Deszyfruj z obrazu</button>
-    <h3>Odszyfrowany tekst:</h3>
-    <p id="output"></p>
-    <h3>Taśma perforowana:</h3>
-    <canvas id="tapeCanvas"></canvas><br>
-    <button onclick="downloadTape()">Pobierz taśmę</button>
-    <input type="file" id="imageInput" accept="image/png" onchange="readImage(this)">
+  <h2>Szyfrowanie i deszyfrowanie tekstu</h2>
+  <textarea id="inputText" rows="4" cols="50" placeholder="Wpisz tekst do zaszyfrowania"></textarea><br>
+  <button onclick="encryptText()">Szyfruj</button>
+  <button onclick="decryptFromImage()">Deszyfruj z obrazu</button>
+  <h3>Odszyfrowany tekst:</h3>
+  <p id="output"></p>
+  <h3>Taśma perforowana:</h3>
+  <canvas id="tapeCanvas"></canvas><br>
+  <button onclick="downloadTape()">Pobierz taśmę</button>
+  <input type="file" id="imageInput" accept="image/png" onchange="readImage(this)">
 
-    <script>
-        let alphabet = "abcdefghijklmnopqrstuvwxyz";
+  <script>
+    let alphabet = "";
 
     async function fetchAlphabet() {
-    try {
-        let response = await fetch("alphabet.json");
-        let data = await response.json();
+      try {
+        const response = await fetch("alphabet.json");
+        const data = await response.json();
         alphabet = data.alphabet;
-        console.log("Pobrany alfabet:", alphabet);
-    } catch (error) {
+        console.log("Pobrany alfabet:", JSON.stringify(alphabet));
+      } catch (error) {
         console.error("Błąd pobierania alfabetu:", error);
+      }
     }
-}
 
     fetchAlphabet();
 
-        function drawTape(binaryArray) {
-            let canvas = document.getElementById("tapeCanvas");
-            let ctx = canvas.getContext("2d");
-            let holeSize = 4, spacing = 10, margin = 15;
-            canvas.width = binaryArray.length * (spacing * 6 + margin);
-            canvas.height = 50;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function encryptText() {
+      const input = document.getElementById("inputText").value;
+      const encrypted = [];
 
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 20, canvas.width, 10);
-
-            binaryArray.forEach((binary, index) => {
-                [...binary].forEach((bit, bitIndex) => {
-                    if (bit === "1") {
-                        ctx.fillStyle = "white";
-                        ctx.beginPath();
-                        ctx.arc(index * (spacing * 6 + margin) + bitIndex * spacing, 25, holeSize, 0, 2 * Math.PI);
-                        ctx.fill();
-                        ctx.strokeStyle = "black";
-                        ctx.stroke();
-                    }
-                });
-            });
-        }
-
-        function downloadTape() {
-            let canvas = document.getElementById("tapeCanvas");
-            let link = document.createElement("a");
-            link.download = "tasma.png";
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-        }
-
-        function readImage(input) {
-            let file = input.files[0];
-            if (!file) return;
-            let img = new Image();
-            let reader = new FileReader();
-            reader.onload = function(event) {
-                img.src = event.target.result;
-                img.onload = function() {
-                    decodeFromImage(img);
-                };
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function decodeFromImage(img) {
-            let canvas = document.createElement("canvas");
-            let ctx = canvas.getContext("2d");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-            let binaryArray = [];
-
-            for (let x = 0; x < canvas.width; x += (10 * 6 + 15)) {
-                let binaryNum = "";
-                for (let bitX = 0; bitX < 6; bitX++) {
-                    let pixel = ctx.getImageData(x + bitX * 10, 25, 1, 1).data;
-                    let brightness = (pixel[0] + pixel[1] + pixel[2]) / 3;
-                    let isHole = brightness > 200;
-                    binaryNum += isHole ? "1" : "0";
-                }
-                binaryArray.push(binaryNum);
-            }
-            
-            let numbers = binaryArray.map(bin => parseInt(bin, 2));
-            let decrypted = numbers.map(num => num === 0 ? " " : alphabet[num - 1] || "?").join("");
-            document.getElementById("output").textContent = decrypted;
-        }
-
-        function decryptFromImage() {
-            let input = document.getElementById("imageInput");
-            if (input.files.length === 0) {
-                alert("Wybierz obraz taśmy perforowanej!");
-                return;
-            }
-            readImage(input);
-        }
-
-        function encryptText() {
-    let input = document.getElementById("inputText").value;
-    let encrypted = [];
-
-    for (let char of input) {
-        if (char === ' ') {
-            encrypted.push(0);
+      for (const char of input) {
+        const index = alphabet.indexOf(char);
+        if (index !== -1) {
+          encrypted.push(index + 1);
         } else {
-            let index = alphabet.indexOf(char);
-            if (index !== -1) {
-                encrypted.push(index + 1);
-            } else {
-                console.warn(`Nieznany znak: '${char}' (kod: ${char.charCodeAt(0)})`);
-            }
+          console.warn(`Nieznany znak: '${char}' (kod: ${char.charCodeAt(0)})`);
         }
+      }
+
+      const binaryResult = encrypted.map(num => num.toString(2).padStart(6, '0'));
+      drawTape(binaryResult);
     }
 
-    let binaryResult = encrypted.map(num => num.toString(2));
-    drawTape(binaryResult);
-}
+    function drawTape(binaryArray) {
+      const canvas = document.getElementById("tapeCanvas");
+      const ctx = canvas.getContext("2d");
+      const holeSize = 4, spacing = 10, margin = 15;
 
-    </script>
+      canvas.width = binaryArray.length * (spacing * 6 + margin);
+      canvas.height = 50;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 20, canvas.width, 10);
+
+      binaryArray.forEach((binary, index) => {
+        [...binary].forEach((bit, bitIndex) => {
+          if (bit === "1") {
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(index * (spacing * 6 + margin) + bitIndex * spacing, 25, holeSize, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = "black";
+            ctx.stroke();
+          }
+        });
+      });
+    }
+
+    function downloadTape() {
+      const canvas = document.getElementById("tapeCanvas");
+      const link = document.createElement("a");
+      link.download = "tasma.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    function readImage(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        img.src = event.target.result;
+        img.onload = function() {
+          decodeFromImage(img);
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function decodeFromImage(img) {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const binaryArray = [];
+
+      for (let x = 0; x < canvas.width; x += (10 * 6 + 15)) {
+        let binaryNum = "";
+        for (let bitX = 0; bitX < 6; bitX++) {
+          const pixel = ctx.getImageData(x + bitX * 10, 25, 1, 1).data;
+          const brightness = (pixel[0] + pixel[1] + pixel[2]) / 3;
+          const isHole = brightness > 200;
+          binaryNum += isHole ? "1" : "0";
+        }
+        binaryArray.push(binaryNum);
+      }
+
+      const numbers = binaryArray.map(bin => parseInt(bin, 2));
+      const decrypted = numbers.map(num => alphabet[num - 1] || "?").join("");
+      document.getElementById("output").textContent = decrypted;
+    }
+
+    function decryptFromImage() {
+      const input = document.getElementById("imageInput");
+      if (input.files.length === 0) {
+        alert("Wybierz obraz taśmy perforowanej!");
+        return;
+      }
+      readImage(input);
+    }
+  </script>
 </body>
 </html>
