@@ -37,26 +37,6 @@
 
     fetchAlphabet();
 
-
-        function encryptText() {
-            let input = document.getElementById("inputText").value.toLowerCase();
-            let encrypted = [];
-            
-            for (let char of input) {
-                if (char === ' ') {
-                    encrypted.push(0);
-                } else {
-                    let index = alphabet.indexOf(char) + 1;
-                    if (index > 0) {
-                        encrypted.push(index);
-                    }
-                }
-            }
-            
-            let binaryResult = encrypted.map(num => num.toString(2).padStart(6, '0'));
-            drawTape(binaryResult);
-        }
-
         function drawTape(binaryArray) {
             let canvas = document.getElementById("tapeCanvas");
             let ctx = canvas.getContext("2d");
