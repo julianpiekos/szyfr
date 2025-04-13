@@ -21,7 +21,7 @@
   <canvas id="tapeCanvas"></canvas><br>
   <button onclick="downloadTape()">Pobierz taśmę</button>
   <input type="file" id="imageInput" accept="image/png" onchange="readImage(this)">
-  <a href="tasma.png" id="easter-egg">jakiś link</a>
+  <a href="tasma.png" id="wiasomosc">jakiś link</a>
 
   <script>
     let alphabet = "";
@@ -138,9 +138,9 @@
     }
     document.addEventListener('keydown', function(e) {
   if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'b') {
-    const easter-egg = document.getElementById('easter-egg');
-    if (easter-egg) {
-      easter-egg.style.display = 'block';
+    const wiasomosc = document.getElementById('easter-egg');
+    if (wiasomosc) {
+      wiasomosc.style.display = 'block';
     }
   }
 });
