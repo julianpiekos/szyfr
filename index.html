@@ -136,6 +136,14 @@
       }
       readImage(input);
     }
+    document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'b') {
+    const egg = document.getElementById('easter-egg');
+    if (egg) {
+      egg.style.display = 'block';
+    }
+  }
+});
   </script>
 </body>
 </html>
