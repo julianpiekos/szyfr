@@ -84,27 +84,34 @@
             reader.readAsDataURL(file);
         }
 
-        function decodeFromImage(img) {
-            let canvas = document.createElement("canvas");
-            let ctx = canvas.getContext("2d");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-            let binaryArray = [];
-            for (let x = 0; x < canvas.width; x += (10 * 16 + 15)) {
-                let binaryNum = "";
-                for (let bitX = 0; bitX < 16; bitX++) {
-                    let pixel = ctx.getImageData(x + bitX * 10, 25, 1, 1).data;
-                    let brightness = (pixel[0] + pixel[1] + pixel[2]) / 3;
-                    let isHole = brightness > 200;
-                    binaryNum += isHole ? "1" : "0";
-                }
-                binaryArray.push(binaryNum);
-            }
-            let numbers = binaryArray.map(bin => parseInt(bin, 2));
-            let decrypted = numbers.map(num => String.fromCharCode(num)).join("");
-            document.getElementById("output").textContent = decrypted;
+function decodeFromImage(img) {
+    let canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    let binaryArray = [];
+    for (let x = 0; x < canvas.width; x += (10 * 16 + 15)) {
+        let binaryNum = "";
+        for (let bitX = 0; bitX < 16; bitX++) {
+            let imageData = ctx.getImageData(x + bitX * 10, 25, 1, 1);
+            let [r, g, b] = imageData.data;
+            let brightness = (r + g + b) / 3;
+            binaryNum += brightness > 127 ? "1" : "0"; // niższy próg = większa czułość
         }
+        binaryArray.push(binaryNum);
+    }
+    let numbers = binaryArray.map(bin => parseInt(bin, 2));
+    let decrypted = numbers.map(num => {
+        try {
+            return String.fromCharCode(num);
+        } catch {
+            return "?";
+        }
+    }).join("");
+    document.getElementById("output").textContent = decrypted;
+}
+
 
         function decryptFromImage() {
             let input = document.getElementById("imageInput");
